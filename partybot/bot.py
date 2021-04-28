@@ -150,36 +150,12 @@ class PartyBot(commands.Bot):
         # for command in command_names:
         #     print(command)
 
-        for pending in self.incoming_pending_friends:
-            try:
-                epic_friend = await pending.accept() if self.settings.friend_accept else await pending.decline()
-                if isinstance(epic_friend, fortnitepy.Friend):
-                    print(self.message % f"Accepted friend request from: {epic_friend.display_name}.")
-                else:
-                    print(self.message % f"Declined friend request from: {pending.display_name}.")
-            except fortnitepy.HTTPException as epic_error:
-                if epic_error.message_code != 'errors.com.epicgames.common.throttled':
-                    raise
-
-                await asyncio.sleep(int(epic_error.message_vars[0] + 1))
-                await pending.accept() if self.settings.friend_accept else await pending.decline()
 
     async def event_party_invite(self, invite: fortnitepy.ReceivedPartyInvitation) -> None:
         await invite.accept()
         print(self.message % f'Accepted party invite from {invite.sender.display_name}.')
 
-    async def event_friend_request(self, request: fortnitepy.IncomingPendingFriend) -> None:
-        if isinstance(request, fortnitepy.OutgoingPendingFriend):
-            return
-
         print(self.message % f"Received friend request from: {request.display_name}.")
-
-        if self.settings.friend_accept:
-            await request.accept()
-            print(self.message % f"Accepted friend request from: {request.display_name}.")
-        else:
-            await request.decline()
-            print(self.message % f"Declined friend request from: {request.display_name}.")
 
     async def event_party_member_join(self, member: fortnitepy.PartyMember) -> None:
         await BenBotAsync.set_default_loadout(
